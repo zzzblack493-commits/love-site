@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For You ♡</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Tajawal:wght@300;400;500&display=swap');
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#faf7f5;color:#403938;font-family:'Tajawal',sans-serif;overflow-x:hidden}
+#stars{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:101}
+.star{position:absolute;color:#9b8580;font-size:10px;opacity:0;animation:twinkle 4s infinite ease-in-out}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.6)}50%{opacity:.75;transform:scale(1.2)}}
+.petal{position:fixed;top:-50px;color:#b99991;opacity:.7;z-index:102;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{0%{transform:translateY(-50px) translateX(0) rotate(0deg);opacity:0}10%{opacity:.8}100%{transform:translateY(110vh) translateX(var(--drift)) rotate(500deg);opacity:0}}
+#flowerBurst{position:fixed;inset:0;z-index:150;pointer-events:none;overflow:hidden;display:none}
+.burst-flower{position:absolute;left:50%;top:50%;font-size:28px;opacity:0;animation:burst 2.8s ease-out forwards}
+@keyframes burst{0%{transform:translate(-50%,-50%) scale(.2) rotate(0deg);opacity:0}15%{opacity:1}100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(var(--scale)) rotate(var(--rotate));opacity:0}}
+#intro{position:fixed;inset:0;z-index:200;background:#faf7f5;display:flex;align-items:center;justify-content:center;transition:opacity 1.2s ease}
+#count{font-family:'Cormorant Garamond',serif;font-size:150px;font-weight:300;letter-spacing:10px;color:#403938;animation:pulse .9s ease}
+@keyframes pulse{0%{opacity:0;transform:scale(.65)}50%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+#lock{position:fixed;inset:0;z-index:190;background:rgba(250,247,245,.98);display:none;align-items:center;justify-content:center;text-align:center;padding:25px;transition:opacity 1s ease}
+.lock-box{max-width:390px;width:100%}
+.small{font-size:12px;letter-spacing:4px;color:#9b8883}
+.lock-box h1{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;margin:15px 0 30px}
+#password{width:100%;border:0;border-bottom:1px solid #b9aaa5;background:transparent;padding:14px 5px;text-align:center;font-family:'Tajawal';font-size:17px;outline:none;color:#403938}
+#password::placeholder{color:#b5a7a2}
+#enter{margin-top:28px;border:1px solid #9e8e89;background:transparent;padding:11px 34px;border-radius:30px;font-family:'Tajawal';cursor:pointer;color:#403938;transition:.3s}
+#enter:hover{background:#403938;color:white}
+#error{min-height:20px;color:#a36f6b;font-size:12px;margin-top:12px}
+#main{min-height:100vh;opacity:0;transition:opacity 2s ease;position:relative;z-index:2}
+#letterSection{min-height:auto;display:flex;align-items:center;justify-content:center;padding:95px 20px 35px;position:relative}
+.envelope-area{text-align:center;width:100%}
+.letter-title{font-family:'Cormorant Garamond',serif;font-size:21px;color:#a18d88;letter-spacing:3px;margin-bottom:48px;position:relative;z-index:20}
+.envelope-wrap{position:relative;width:340px;height:380px;margin:0 auto}
+.paper{position:absolute;left:50%;bottom:20px;width:275px;height:225px;padding:22px 25px;background:#fffdfb;border:1px solid #eee3df;box-shadow:0 10px 30px rgba(70,45,40,.12);transform:translateX(-50%);opacity:0;z-index:2;overflow:hidden;transition:transform 1.2s ease,opacity 1s ease}
+.envelope-wrap.open .paper{opacity:1;transform:translate(-50%,-150px);z-index:9}
+#paperText{width:100%;height:180px;overflow:hidden;font-family:'Cormorant Garamond',serif;font-size:20px;line-height:1.55;text-align:center;overflow-wrap:break-word}
+.envelope{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);width:340px;height:210px;background:#eadbd6;border-radius:6px;box-shadow:0 18px 45px rgba(70,45,40,.16);z-index:3}
+.envelope-front{position:absolute;inset:0;background:#eadbd6;border-radius:6px;overflow:hidden;z-index:4}
+.envelope-front:before{content:"";position:absolute;left:0;bottom:0;width:0;height:0;border-style:solid;border-width:105px 170px 0 0;border-color:#dfcdc7 transparent transparent transparent}
+.envelope-front:after{content:"";position:absolute;right:0;bottom:0;width:0;height:0;border-style:solid;border-width:105px 0 0 170px;border-color:#dfcdc7 transparent transparent transparent}
+.flap{position:absolute;left:0;top:0;width:100%;height:120px;background:#e3d1cb;clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top center;transition:transform 1.2s ease;z-index:7}
+.envelope-wrap.open .flap{transform:rotateX(180deg)}
+.heart{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:#fff8f6;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 8px 25px rgba(70,45,40,.18);cursor:pointer;z-index:10;transition:.3s}
+.heart:hover{transform:translate(-50%,-50%) scale(1.1)}
+.envelope-wrap.open .heart{opacity:0;pointer-events:none}
+.open-hint{margin-top:0;font-family:'Cormorant Garamond',serif;font-size:20px;color:#a18d88;letter-spacing:2px;animation:hintFloat 2.5s ease-in-out infinite}
+@keyframes hintFloat{0%,100%{transform:translateY(0);opacity:.65}50%{transform:translateY(-5px);opacity:1}}
+#loveMessage{max-width:700px;margin:0 auto;padding:55px 25px 100px;text-align:center;opacity:1;transform:none}
+.message-small{font-size:11px;letter-spacing:4px;color:#a18d88}
+.message-title{font-family:'Cormorant Garamond',serif;font-size:58px;font-weight:300;margin:18px 0 25px}
+.message-text{font-family:'Cormorant Garamond',serif;font-size:25px;line-height:1.9;font-weight:300}
+.signature{margin-top:35px;font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic}
+.gallery-section{padding:100px 20px 140px;text-align:center;position:relative}
+.gallery-title{font-family:'Cormorant Garamond',serif;font-size:54px;font-weight:300;margin-bottom:70px}
+.gallery{width:min(440px,92%);margin:auto;display:flex;flex-direction:column;gap:90px;position:relative}
+.gallery:before{content:"";position:absolute;top:-30px;bottom:-30px;left:50%;width:2px;border-left:2px dashed #a48bbd;transform:translateX(-50%);z-index:1;opacity:.6}
+.photo{position:relative;padding:16px 16px 20px;background:#fff;box-shadow:0 12px 35px rgba(80,50,45,.12);border-radius:4px;z-index:2;transition:transform .5s ease,box-shadow .5s ease}
+.photo:nth-child(odd){transform:rotate(-2.5deg)}
+.photo:nth-child(even){transform:rotate(2.5deg)}
+.photo:hover{transform:rotate(0deg) scale(1.02);box-shadow:0 20px 45px rgba(80,50,45,.18);z-index:10}
+.photo:before,.photo:after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:16px;height:26px;background:#9b72cf;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.2);z-index:6}
+.photo:before{top:-14px}
+.photo:after{bottom:-14px}
+.photo img{width:100%;aspect-ratio:1/1.05;object-fit:cover;display:block;border-radius:2px}
+.photo-caption{margin-top:15px;font-family:'Tajawal',sans-serif;font-size:16px;color:#735d67;display:flex;flex-direction:column;align-items:center;gap:4px}
+.photo-caption .date{font-size:12px;color:#aa95a1;background:#f4edf7;padding:2px 10px;border-radius:12px}
+.photo-caption .emoji{font-size:22px}
+.scratch-section{padding:100px 20px 140px;text-align:center}
+.scratch-title{font-family:'Cormorant Garamond',serif;font-size:50px;font-weight:300;margin-bottom:15px}
+.scratch-subtitle{color:#a18d88;font-size:13px;margin-bottom:45px}
+.scratch-card{position:relative;width:min(700px,92%);min-height:330px;margin:auto;background:#fffdfb;border:1px solid #eaded9;box-shadow:0 20px 55px rgba(70,45,40,.13);overflow:hidden}
+.hidden-message{padding:55px 35px;font-family:'Cormorant Garamond',serif;font-size:27px;line-height:2;color:#4b3d3a}
+.hidden-message .tiny{font-size:18px;color:#a18d88}
+#scratchCanvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;touch-action:pan-y}
+.scratch-hint{margin-top:22px;color:#9e8e89;font-size:12px;letter-spacing:1px}
+.gift-section{min-height:75vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 20px 150px}
+.gift-title{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;margin-bottom:40px}
+.gift{position:relative;width:170px;height:145px;cursor:pointer;transition:.5s}
+.gift:hover{transform:translateY(-10px)}
+.gift-box{position:absolute;bottom:0;width:170px;height:105px;background:#e6c9c2;border-radius:4px;box-shadow:0 15px 30px rgba(70,40,35,.16)}
+.gift-lid{position:absolute;top:20px;left:-8px;width:186px;height:35px;background:#d8b4ac;border-radius:4px;z-index:2}
+.ribbon-v{position:absolute;left:72px;top:20px;width:25px;height:125px;background:#f5e5df;z-index:3}
+.ribbon-h{position:absolute;top:67px;width:170px;height:20px;background:#f5e5df;z-index:4}
+.bow{position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:50px;z-index:5}
+.gift-note{margin-top:35px;color:#a18d88;font-size:13px;letter-spacing:2px}
+.music-note{position:fixed;right:18px;bottom:18px;border:1px solid #b9aaa5;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;z-index:30;background:#faf7f5cc;backdrop-filter:blur(5px)}
+@media(max-width:650px){
+#count{font-size:145px}
+.lock-box h1{font-size:44px}
+#letterSection{padding-top:75px;padding-bottom:25px}
+.letter-title{font-size:18px;margin-bottom:42px}
+.envelope-wrap{width:300px;height:355px}
+.envelope{width:300px;height:190px}
+.envelope-front:before{border-width:95px 150px 0 0}
+.envelope-front:after{border-width:95px 0 0 150px}
+.paper{width:255px;height:205px;padding:18px 20px}
+.envelope-wrap.open .paper{transform:translate(-50%,-140px)}
+#paperText{height:165px;font-size:18px;line-height:1.5}
+.open-hint{font-size:19px;margin-top:0}
+#loveMessage{padding:45px 22px 90px}
+.message-title{font-size:47px}
+.message-text{font-size:22px}
+.gallery{width:88%;gap:70px}
+.gallery-title{font-size:43px}
+.scratch-title{font-size:42px}
+.hidden-message{font-size:23px;padding:45px 22px}
+}
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<div id="intro"><div id="count">3</div></div>
+<div id="lock">
+  <div class="lock-box">
+    <div class="small">A LITTLE SECRET</div>
+    <h1>Just for us ♡</h1>
+    <input id="password" type="password" placeholder="اكتب كلمة السر" autocomplete="off">
+    <button id="enter">دخول ♡</button>
+    <div id="error" aria-live="polite"></div>
+  </div>
+</div>
+<div id="flowerBurst"></div>
+<audio id="music" preload="auto"><source src="./music.mp3" type="audio/mpeg"></audio>
+<main id="main">
+  <section id="letterSection">
+    <div class="envelope-area">
+      <div class="letter-title">THERE'S SOMETHING FOR YOU ♡</div>
+      <div class="envelope-wrap" id="envelopeWrap">
+        <div class="paper"><div id="paperText"></div></div>
+        <div class="envelope">
+          <div class="flap"></div>
+          <div class="envelope-front"></div>
+          <div class="heart" id="heart">♡</div>
+        </div>
+      </div>
+      <div class="open-hint">افتحي الظرف ♡</div>
+    </div>
+  </section>
+  <section id="loveMessage">
+    <div class="message-small">FOR THE ONE I LOVE</div>
+    <h2 class="message-title">إلى أجمل شخص في حياتي ♡</h2>
+    <div class="message-text">
+      مش عارف إذا كان الكلام ممكن يوصف اللي جوايا فعلًا ولا لأ...
+      <br><br>
+      بس أنا عارف حاجة واحدة، إن وجودك في حياتي خلّى حاجات كتير ليها معنى أجمل.
+      <br><br>
+      يمكن مفيش كلام مثالي يكفي، وممكن أفضل ساكت أوقات كتير، لكن الحقيقة البسيطة هي...
+      <br>
+      <strong>أنا بحب وجودك في حياتي أكتر مما تتخيلي. ♡</strong>
+    </div>
+    <div class="signature">— منّي إليكِ، بكل حب</div>
+  </section>
+  <section class="gallery-section">
+    <div class="gallery-title">ذكرياتنا ♡</div>
+    <div class="gallery">
+      <div class="photo">
+        <img src="./photo1.jpg" alt="ذكرياتنا" onerror="this.style.display='none';">
+        <div class="photo-caption"><span>أول خروجة لينا فاكرة؟</span><span class="date">22/1/2025</span></div>
+      </div>
+      <div class="photo"><img src="./photo2.jpg" alt="ذكرياتنا" onerror="this.style.display='none';"><div class="photo-caption"><span class="emoji">😍</span></div></div>
+      <div class="photo"><img src="./photo3.jpg" alt="ذكرياتنا" onerror="this.style.display='none';"><div class="photo-caption"><span>أحلى يوم سوا ♡</span></div></div>
+      <div class="photo"><img src="./photo4.jpg" alt="ذكرياتنا" onerror="this.style.display='none';"><div class="photo-caption"><span class="emoji">✨❤️</span></div></div>
+      <div class="photo"><img src="./photo5.jpg" alt="ذكرياتنا" onerror="this.style.display='none';"><div class="photo-caption"><span>ضحكتك هي كل حاجة</span></div></div>
+      <div class="photo"><img src="./photo6.jpg" alt="ذكرياتنا" onerror="this.style.display='none';"><div class="photo-caption"><span class="emoji">👩‍❤️‍👨</span></div></div>
+    </div>
+  </section>
+  <section class="scratch-section">
+    <div class="scratch-title">حاجة صغيرة ليكي... ♡</div>
+    <div class="scratch-subtitle">مش هقولك هي إيه... اكتشفيها بنفسك</div>
+    <div class="scratch-card">
+      <div class="hidden-message">
+        <div class="tiny">لو وصلتي لهنا...</div><br>
+        فأنا عايزك تعرفي إنك مش مجرد شخص عدى في حياتي...
+        <br>
+        إنتِ ذكرى جميلة أتمنى تفضل موجودة جوايا دايمًا.
+        <br><br>
+        <strong>وأنا محظوظ إني عرفتك. ❤️</strong>
+      </div>
+      <canvas id="scratchCanvas"></canvas>
+    </div>
+    <div class="scratch-hint">✦ حرّكي صباعك على الشاشة عشان تكشفي الرسالة ✦</div>
+  </section>
+  <section class="gift-section">
+    <div class="gift-title">ولسه في حاجة أخيرة... 🎁</div>
+    <div class="gift" id="gift">
+      <div class="bow">🎀</div><div class="gift-lid"></div><div class="gift-box"></div><div class="ribbon-v"></div><div class="ribbon-h"></div>
+    </div>
+    <div class="gift-note">اضغطي على الهدية ♡</div>
+  </section>
+</main>
+<div class="music-note" aria-hidden="true">♫</div>
+<script>
+/* كلمة السر */
+const SECRET = "27/5/2021";
+
+/* العناصر */
+const intro = document.getElementById("intro");
+const count = document.getElementById("count");
+const lock = document.getElementById("lock");
+const main = document.getElementById("main");
+const password = document.getElementById("password");
+const enter = document.getElementById("enter");
+const error = document.getElementById("error");
+const music = document.getElementById("music");
+const envelopeWrap = document.getElementById("envelopeWrap");
+const heart = document.getElementById("heart");
+const stars = document.getElementById("stars");
+const flowerBurst = document.getElementById("flowerBurst");
+const paperText = document.getElementById("paperText");
+
+/* نجوم */
+for(let i=0;i<55;i++){
+  const star=document.createElement("div");
+  star.className="star";
+  const symbols=["✦","✧","⋆","·","♡"];
+  star.textContent=symbols[Math.floor(Math.random()*symbols.length)];
+  star.style.left=Math.random()*100+"vw";
+  star.style.top=Math.random()*100+"vh";
+  star.style.fontSize=(7+Math.random()*12)+"px";
+  star.style.animationDelay=Math.random()*5+"s";
+  star.style.animationDuration=(3+Math.random()*5)+"s";
+  stars.appendChild(star);
+}
+
+/* بتلات متساقطة */
+function createPetal(){
+  const p=document.createElement("div");
+  p.className="petal";
+  p.textContent=Math.random()>.45?"♡":"✦";
+  p.style.left=Math.random()*100+"vw";
+  p.style.setProperty("--drift",(-100+Math.random()*200)+"px");
+  p.style.animationDuration=(7+Math.random()*8)+"s";
+  p.style.fontSize=(9+Math.random()*15)+"px";
+  document.body.appendChild(p);
+  setTimeout(()=>p.remove(),16000);
+}
+
+/* انفجار ورود */
+function flowerExplosion(){
+  flowerBurst.style.display="block";
+  const flowers=["🌹","🌸","🌷","🌺","🌹","💗","🌸","🌷"];
+  for(let i=0;i<70;i++){
+    const flower=document.createElement("div");
+    flower.className="burst-flower";
+    flower.textContent=flowers[Math.floor(Math.random()*flowers.length)];
+    const angle=Math.random()*Math.PI*2;
+    const distance=250+Math.random()*650;
+    flower.style.setProperty("--x",Math.cos(angle)*distance+"px");
+    flower.style.setProperty("--y",Math.sin(angle)*distance+"px");
+    flower.style.setProperty("--scale",.5+Math.random()*1.5);
+    flower.style.setProperty("--rotate",(-180+Math.random()*360)+"deg");
+    flower.style.animationDelay=Math.random()*.4+"s";
+    flowerBurst.appendChild(flower);
+  }
+  setTimeout(()=>{flowerBurst.innerHTML="";flowerBurst.style.display="none";},3300);
+}
+
+/* العد التنازلي */
+let n=3;
+const timer=setInterval(()=>{
+  n--;
+  if(n>0){
+    count.textContent=n;
+    count.style.animation="none";
+    void count.offsetWidth;
+    count.style.animation="pulse .9s ease";
+  }else{
+    clearInterval(timer);
+    intro.style.opacity="0";
+    setTimeout(()=>{
+      intro.style.display="none";
+      lock.style.display="flex";
+    },1200);
+  }
+},1000);
+
+/* فتح الموقع */
+let isUnlocked=false;
+function unlock(){
+  if(isUnlocked)return;
+  if(password.value.trim()===SECRET){
+    isUnlocked=true;
+    music.currentTime=0;
+    music.loop=false;
+    music.volume=.8;
+    music.play().catch(()=>{});
+    flowerExplosion();
+    for(let i=0;i<18;i++)setTimeout(createPetal,i*250);
+    const petalInterval=setInterval(createPetal,850);
+    setTimeout(()=>clearInterval(petalInterval),18000);
+    lock.style.opacity="0";
+    setTimeout(()=>{
+      lock.style.display="none";
+      main.style.opacity="1";
+    },700);
+  }else{
+    error.textContent="كلمة السر مش صحيحة ♡";
+    password.value="";
+    password.focus();
+  }
+}
+enter.addEventListener("click",unlock);
+password.addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
+
+/* رسالة الظرف */
+const letterText =
+`إلى حنتي الجميلة ❤️
+
+بحبك يا حنتي، ويمكن مش بعرف
+أقول كل اللي جوايا بالكلام،
+بس حبيت أسيبلك الرسالة دي
+عشان تعرفي قد إيه إنتِ غالية عندي.
+
+من أول ما اتقابلنا يوم
+22/1/2025، وإنتِ ليكي مكان
+مميز في قلبي.
+
+خليكي دايمًا بخير،
+ومتنسيش أبدًا إني بحبك
+وبتمنى أشوفك مبسوطة دايمًا. ❤️`;
+
+/* كتابة الرسالة تدريجيًا */
+function typeLetter(){
+  paperText.textContent="";
+  let index=0;
+  function write(){
+    if(index>=letterText.length)return;
+    const char=letterText[index++];
+    if(char==="\n")paperText.appendChild(document.createElement("br"));
+    else paperText.appendChild(document.createTextNode(char));
+    setTimeout(write,45);
+  }
+  write();
+}
+
+/* فتح الظرف */
+heart.addEventListener("click",()=>{
+  if(envelopeWrap.classList.contains("open"))return;
+  envelopeWrap.classList.add("open");
+  setTimeout(typeLetter,1200);
+});
+
+/* بطاقة الخدش */
+const canvas=document.getElementById("scratchCanvas");
+const ctx=canvas.getContext("2d");
+const scratchCard=document.querySelector(".scratch-card");
+
+function setupScratch(){
+  const rect=scratchCard.getBoundingClientRect();
+  if(!rect.width||!rect.height)return;
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=Math.round(rect.width*dpr);
+  canvas.height=Math.round(rect.height*dpr);
+  canvas.style.width=rect.width+"px";
+  canvas.style.height=rect.height+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const gradient=ctx.createLinearGradient(0,0,rect.width,rect.height);
+  gradient.addColorStop(0,"#c8bbb6");
+  gradient.addColorStop(.5,"#b8aaa5");
+  gradient.addColorStop(1,"#d3c7c2");
+  ctx.globalCompositeOperation="source-over";
+  ctx.globalAlpha=1;
+  ctx.fillStyle=gradient;
+  ctx.fillRect(0,0,rect.width,rect.height);
+  ctx.fillStyle="rgba(255,255,255,.8)";
+  ctx.font="16px Tajawal";
+  ctx.textAlign="center";
+  ctx.fillText("♡  اخدشي هنا  ♡",rect.width/2,rect.height/2);
+  ctx.globalAlpha=.15;
+  for(let i=0;i<25;i++){
+    ctx.beginPath();
+    ctx.arc(Math.random()*rect.width,Math.random()*rect.height,2+Math.random()*5,0,Math.PI*2);
+    ctx.fillStyle="#ffffff";
+    ctx.fill();
+  }
+  ctx.globalAlpha=1;
+}
+
+/* الخدش بالماوس واللمس */
+let scratching=false;
+let touchStartX=0,touchStartY=0,touchDirection=null;
+
+function getPosition(e){
+  const rect=canvas.getBoundingClientRect();
+  let clientX,clientY;
+  if(e.touches&&e.touches.length){
+    clientX=e.touches[0].clientX;
+    clientY=e.touches[0].clientY;
+  }else{
+    clientX=e.clientX;
+    clientY=e.clientY;
+  }
+  return {x:clientX-rect.left,y:clientY-rect.top};
+}
+function scratch(e){
+  if(!scratching)return;
+  const pos=getPosition(e);
+  ctx.globalCompositeOperation="destination-out";
+  ctx.beginPath();
+  ctx.arc(pos.x,pos.y,25,0,Math.PI*2);
+  ctx.fill();
+  ctx.globalCompositeOperation="source-over";
+}
+canvas.addEventListener("mousedown",()=>{scratching=true;});
+canvas.addEventListener("mousemove",e=>{if(scratching)scratch(e);});
+window.addEventListener("mouseup",()=>{scratching=false;});
+canvas.addEventListener("touchstart",e=>{
+  if(!e.touches.length)return;
+  touchStartX=e.touches[0].clientX;
+  touchStartY=e.touches[0].clientY;
+  touchDirection=null;
+  scratching=false;
+},{passive:true});
+canvas.addEventListener("touchmove",e=>{
+  if(!e.touches.length)return;
+  const currentX=e.touches[0].clientX;
+  const currentY=e.touches[0].clientY;
+  const dx=currentX-touchStartX;
+  const dy=currentY-touchStartY;
+  if(!touchDirection){
+    if(Math.abs(dx)<8&&Math.abs(dy)<8)return;
+    touchDirection=Math.abs(dx)>Math.abs(dy)?"scratch":"scroll";
+    scratching=touchDirection==="scratch";
+  }
+  if(touchDirection==="scratch"){
+    e.preventDefault();
+    scratch(e);
+    touchStartX=currentX;
+    touchStartY=currentY;
+  }
+},{passive:false});
+canvas.addEventListener("touchend",()=>{scratching=false;touchDirection=null;});
+window.addEventListener("load",setupScratch);
+window.addEventListener("resize",setupScratch);
+
+/* الهدية */
+document.getElementById("gift").addEventListener("click",()=>{
+  alert("أنتِ أجمل هدية أصلًا ❤️");
+});
+</script>
+</body>
+</html>
